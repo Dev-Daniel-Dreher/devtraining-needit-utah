@@ -48,11 +48,16 @@
       restMessage.setEndpoint('https://api.anthropic.com/v1/messages');
       restMessage.setHttpMethod('POST');
       
-      // Credential für API Key verwenden
-      restMessage.setAuthentication('apikey');
-      restMessage.setAuthenticationProfile('Claude-API-Key');
+      // Credential für API Key laden
+      var credential = new sn_cc.ConnectionInfoProvider().getCredentialByID('Claude-API-Key');
+      if (!credential) {
+        gs.info('Claude API Credential nicht gefunden');
+        matchPercentage = calculateSimpleMatch(shortDescription, requestType);
+        return;
+      }
       
       // Headers setzen
+      restMessage.setRequestHeader('x-api-key', credential.getAPIKey());
       restMessage.setRequestHeader('anthropic-version', '2023-06-01');
       restMessage.setRequestHeader('content-type', 'application/json');
       
