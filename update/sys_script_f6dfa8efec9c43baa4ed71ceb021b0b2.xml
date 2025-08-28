@@ -9,6 +9,7 @@
         <active>true</active>
         <add_message>false</add_message>
         <advanced>true</advanced>
+        <async>true</async>
         <change_fields>false</change_fields>
         <client_callable>false</client_callable>
         <collection>x_58872_needit_needit</collection>
@@ -115,8 +116,14 @@
   gs.info('Short Description Validation - Request Type: "' + requestType + '", Short Description: "' + shortDescription + '", Match Percentage: ' + matchPercentage + '%');
   
   // Wenn Übereinstimmung unter 50%, Hinweismeldung anzeigen
+  // Da dies eine async Business Rule ist, können wir keine gs.addInfoMessage verwenden
+  // Stattdessen loggen wir die Warnung
   if (matchPercentage < 50) {
-    gs.addInfoMessage('Hinweis: Die Kurzbeschreibung entspricht nur zu ' + matchPercentage + '% dem gewählten Request Type "' + requestType + '". Bitte überprüfen Sie Ihre Eingabe.');
+    gs.info('WARNUNG für Record ' + current.sys_id + ': Die Kurzbeschreibung entspricht nur zu ' + matchPercentage + '% dem gewählten Request Type "' + requestType + '"');
+    
+    // Optional: Work Notes hinzufügen als Alternative zur Info Message
+    current.work_notes = 'System-Hinweis: Die Kurzbeschreibung entspricht nur zu ' + matchPercentage + '% dem gewählten Request Type "' + requestType + '". Bitte überprüfen Sie Ihre Eingabe.';
+    current.update();
   }
   
   // Hilfsfunktion für einfache String-Ähnlichkeit als Fallback
