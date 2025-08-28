@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update sys_domain="global" table="sys_script">
+    <sys_script action="INSERT_OR_UPDATE">
+        <abort_action>false</abort_action>
+        <access>package_private</access>
+        <action_delete>false</action_delete>
+        <action_insert>true</action_insert>
+        <action_query>false</action_query>
+        <action_update>true</action_update>
+        <active>true</active>
+        <add_message>false</add_message>
+        <advanced>true</advanced>
+        <change_fields>false</change_fields>
+        <client_callable>false</client_callable>
+        <collection>x_58872_needit_needit</collection>
+        <condition/>
+        <description/>
+        <execute_function>false</execute_function>
+        <filter_condition/>
+        <is_rest>false</is_rest>
+        <message/>
+        <name>NeedIt Short Description Validation</name>
+        <order>100</order>
+        <priority>100</priority>
+        <rest_method/>
+        <rest_method_text/>
+        <rest_service/>
+        <rest_service_text/>
+        <rest_variables/>
+        <role_conditions/>
+        <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+
+  // Prüfe ob Short Description und Request Type vorhanden sind
+  if (!current.short_description || !current.u_request_type) {
+    return;
+  }
+
+  var shortDescription = current.short_description.toString();
+  var requestType = current.u_request_type.getDisplayValue();
+  
+  // Einfache Überprüfung: Wenn Request Type in Short Description vorkommt = 100%
+  var matchPercentage = 0;
+  if (shortDescription.toLowerCase().indexOf(requestType.toLowerCase()) !== -1) {
+    matchPercentage = 100;
+  } else {
+    // Claude API Aufruf für detailliertere Analyse
+    try {
+      var restMessage = new sn_ws.RESTMessageV2();
+      restMessage.setEndpoint('https://api.anthropic.com/v1/messages');
+      restMessage.setHttpMethod('POST');
+      
+      // Credential für API Key verwenden
+      restMessage.setAuthentication('apikey');
+      restMessage.setAuthenticationProfile('Claude-API-Key');
+      
+      // Headers setzen
+      restMessage.setRequestHeader('anthropic-version', '2023-06-01');
+      restMessage.setRequestHeader('content-type', 'application/json');
+      
+      // Request Body erstellen
+      var requestBody = {
+        "model": "claude-3-5-sonnet-20241022",
+        "max_tokens": 1024,
+        "messages": [
+          {
+            "role": "user", 
+            "content": "Bewerte wie gut die folgende Kurzbeschreibung zum angegebenen Request Type passt. Gib nur eine Zahl zwischen 0 und 100 zurück (Prozent der Übereinstimmung).\n\nRequest Type: " + requestType + "\nKurzbeschreibung: " + shortDescription
+          }
+        ]
+      };
+      
+      restMessage.setRequestBody(JSON.stringify(requestBody));
+      
+      var response = restMessage.execute();
+      var responseBody = response.getBody();
+      
+      if (response.getStatusCode() == 200) {
+        var claudeResponse = JSON.parse(responseBody);
+        if (claudeResponse.content && claudeResponse.content.length > 0) {
+          var content = claudeResponse.content[0].text;
+          // Extrahiere Prozentsatz aus der Antwort
+          var percentMatch = content.match(/\d+/);
+          if (percentMatch) {
+            matchPercentage = parseInt(percentMatch[0]);
+          }
+        }
+      } else {
+        gs.log('Claude API Fehler: ' + response.getStatusCode() + ' - ' + responseBody, 'NeedIt Validation');
+        // Fallback: Einfache String-Ähnlichkeit
+        matchPercentage = calculateSimpleMatch(shortDescription, requestType);
+      }
+    } catch (e) {
+      gs.log('Fehler beim Claude API Aufruf: ' + e.message, 'NeedIt Validation');
+      // Fallback: Einfache String-Ähnlichkeit
+      matchPercentage = calculateSimpleMatch(shortDescription, requestType);
+    }
+  }
+  
+  // Log die berechnete Prozent-Übereinstimmung
+  gs.log('Short Description Validation - Request Type: "' + requestType + '", Short Description: "' + shortDescription + '", Match Percentage: ' + matchPercentage + '%', 'NeedIt Validation');
+  
+  // Wenn Übereinstimmung unter 50%, Hinweismeldung anzeigen
+  if (matchPercentage < 50) {
+    gs.addInfoMessage('Hinweis: Die Kurzbeschreibung entspricht nur zu ' + matchPercentage + '% dem gewählten Request Type "' + requestType + '". Bitte überprüfen Sie Ihre Eingabe.');
+  }
+  
+  // Hilfsfunktion für einfache String-Ähnlichkeit als Fallback
+  function calculateSimpleMatch(desc, reqType) {
+    var descWords = desc.toLowerCase().split(/\s+/);
+    var reqTypeWords = reqType.toLowerCase().split(/\s+/);
+    var matches = 0;
+    
+    for (var i = 0; i < reqTypeWords.length; i++) {
+      for (var j = 0; j < descWords.length; j++) {
+        if (descWords[j].indexOf(reqTypeWords[i]) !== -1 || reqTypeWords[i].indexOf(descWords[j]) !== -1) {
+          matches++;
+          break;
+        }
+      }
+    }
+    
+    return Math.round((matches / reqTypeWords.length) * 100);
+  }
+
+})(current, previous);]]></script>
+        <sys_class_name>sys_script</sys_class_name>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-08-28 10:00:00</sys_created_on>
+        <sys_domain>global</sys_domain>
+        <sys_domain_path>/</sys_domain_path>
+        <sys_id>f6dfa8efec9c43baa4ed71ceb021b0b2</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_name>NeedIt Short Description Validation</sys_name>
+        <sys_overrides/>
+        <sys_package display_value="NeedIt" source="x_58872_needit">6ead8e780f603200cd674f8ce1050ed1</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="NeedIt">6ead8e780f603200cd674f8ce1050ed1</sys_scope>
+        <sys_update_name>sys_script_f6dfa8efec9c43baa4ed71ceb021b0b2</sys_update_name>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-08-28 10:00:00</sys_updated_on>
+        <template/>
+        <when>after</when>
+    </sys_script>
+    <sys_translated_text action="delete_multiple" query="documentkey=f6dfa8efec9c43baa4ed71ceb021b0b2"/>
+    <sys_es_latest_script action="INSERT_OR_UPDATE">
+        <id>f6dfa8efec9c43baa4ed71ceb021b0b2</id>
+        <sys_created_by>admin</sys_created_by>
+        <sys_created_on>2025-08-28 10:00:00</sys_created_on>
+        <sys_id>a1b2c3d4e5f6789012345678901234ab</sys_id>
+        <sys_mod_count>0</sys_mod_count>
+        <sys_updated_by>admin</sys_updated_by>
+        <sys_updated_on>2025-08-28 10:00:00</sys_updated_on>
+        <table>sys_script</table>
+        <use_es_latest>true</use_es_latest>
+    </sys_es_latest_script>
+</record_update>
