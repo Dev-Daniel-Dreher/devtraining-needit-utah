@@ -28,7 +28,8 @@
         <rest_service_text/>
         <rest_variables/>
         <role_conditions/>
-        <script><![CDATA[(function executeRule(current, previous /*null when async*/) {
+        <script>
+        <![CDATA[(function executeRule(current, previous /*null when async*/) {
 
   // Prüfe ob Short Description und Request Type vorhanden sind
   if (!current.short_description || !current.u_request_type) {
@@ -50,6 +51,17 @@
       restMessage.setHttpMethod('POST');
       
       // Credential für API Key laden mit sn_auth.Credential API
+      // The sys_id of your API Key Credential (sys_auth_profile_apikey record)
+        var credentialSysId = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+        // Load the API
+        var Credential = new sn_auth.Credential();
+        var cred = Credential.getCredential(credentialSysId);
+
+        if (cred) {
+            var apiKey = cred.getPassword();  // securely retrieves the stored API Key
+            
+            
       var Credential = new sn_auth.Credential();
       var cred = Credential.getCredential('Claude-API-Key');
       
