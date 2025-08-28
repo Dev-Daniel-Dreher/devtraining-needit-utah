@@ -84,19 +84,19 @@
           }
         }
       } else {
-        gs.log('Claude API Fehler: ' + response.getStatusCode() + ' - ' + responseBody, 'NeedIt Validation');
+        gs.info('Claude API Fehler: ' + response.getStatusCode() + ' - ' + responseBody);
         // Fallback: Einfache String-Ähnlichkeit
         matchPercentage = calculateSimpleMatch(shortDescription, requestType);
       }
     } catch (e) {
-      gs.log('Fehler beim Claude API Aufruf: ' + e.message, 'NeedIt Validation');
+      gs.info('Fehler beim Claude API Aufruf: ' + e.message);
       // Fallback: Einfache String-Ähnlichkeit
       matchPercentage = calculateSimpleMatch(shortDescription, requestType);
     }
   }
   
   // Log die berechnete Prozent-Übereinstimmung
-  gs.log('Short Description Validation - Request Type: "' + requestType + '", Short Description: "' + shortDescription + '", Match Percentage: ' + matchPercentage + '%', 'NeedIt Validation');
+  gs.info('Short Description Validation - Request Type: "' + requestType + '", Short Description: "' + shortDescription + '", Match Percentage: ' + matchPercentage + '%');
   
   // Wenn Übereinstimmung unter 50%, Hinweismeldung anzeigen
   if (matchPercentage < 50) {
