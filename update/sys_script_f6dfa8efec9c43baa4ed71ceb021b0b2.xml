@@ -48,8 +48,7 @@
       restMessage.setHttpMethod('POST');
 
       // 🔑 Load API key using Credential Alias
-      var alias = new sn_auth.CredentialAlias();
-      var cred = alias.getCredential('x_58872_needit.Claude_Code_Alias');
+      var cred = sn_auth.CredentialAlias.getCredential('x_58872_needit.Claude_Code_Alias');
 
       var apiKey = null;
       if (cred) {
