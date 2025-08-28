@@ -50,14 +50,16 @@
       restMessage.setHttpMethod('POST');
       
       // Credential für API Key laden mit sn_auth.Credential API
-      var credential = new sn_auth.Credential();
-      var apiKey = credential.get('Claude-API-Key');
+      var Credential = new sn_auth.Credential();
+      var cred = Credential.getCredential('Claude-API-Key');
       
-      if (!apiKey) {
+      if (!cred || !cred.password) {
         gs.info('Claude API Credential "Claude-API-Key" nicht gefunden');
         matchPercentage = calculateSimpleMatch(shortDescription, requestType);
         return;
       }
+      
+      var apiKey = cred.password;
       restMessage.setRequestHeader('x-api-key', apiKey);
       restMessage.setRequestHeader('anthropic-version', '2023-06-01');
       restMessage.setRequestHeader('content-type', 'application/json');
