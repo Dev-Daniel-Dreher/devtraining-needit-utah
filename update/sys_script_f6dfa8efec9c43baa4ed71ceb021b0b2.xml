@@ -49,7 +49,7 @@
       restMessage.setHttpMethod('POST');
       
       // Credential für API Key laden
-      var credentialGR = new GlideRecord('sys_auth_profile_basic');
+      var credentialGR = new GlideRecord('sys_auth_profile_api_key');
       credentialGR.addQuery('name', 'Claude-API-Key');
       credentialGR.query();
       
@@ -60,7 +60,7 @@
       }
       
       // Headers setzen - API Key aus Credential laden
-      var apiKey = credentialGR.getValue('password');
+      var apiKey = credentialGR.getValue('api_key');
       restMessage.setRequestHeader('x-api-key', apiKey);
       restMessage.setRequestHeader('anthropic-version', '2023-06-01');
       restMessage.setRequestHeader('content-type', 'application/json');
