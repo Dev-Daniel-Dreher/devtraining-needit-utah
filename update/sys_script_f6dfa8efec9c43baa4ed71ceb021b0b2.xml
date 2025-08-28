@@ -51,8 +51,8 @@
       restMessage.setHttpMethod('POST');
       
       // Credential für API Key laden mit sn_auth.Credential API
-      // Lade die credentialSysId aus der sys_auth_profile_apikey Tabelle
-      var apiKeyGR = new GlideRecord('sys_auth_profile_apikey');
+      // Lade die credentialSysId aus der sys_auth_profile_basic Tabelle
+      var apiKeyGR = new GlideRecord('sys_auth_profile_basic');
       apiKeyGR.addQuery('name', 'Claude-API-Key');
       apiKeyGR.query();
       
@@ -72,7 +72,7 @@
           return;
         }
       } else {
-        gs.info('Claude API Credential "Claude-API-Key" nicht in sys_auth_profile_apikey gefunden');
+        gs.info('Claude API Credential "Claude-API-Key" nicht in sys_auth_profile_basic gefunden');
         matchPercentage = calculateSimpleMatch(shortDescription, requestType);
         return;
       }
