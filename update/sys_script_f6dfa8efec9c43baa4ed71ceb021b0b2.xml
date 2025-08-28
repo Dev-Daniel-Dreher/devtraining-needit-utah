@@ -49,25 +49,14 @@
       restMessage.setEndpoint('https://api.anthropic.com/v1/messages');
       restMessage.setHttpMethod('POST');
       
-      // Credential für API Key laden - verwende discovery_credentials Tabelle
-      var credentialGR = new GlideRecord('discovery_credentials');
-      credentialGR.addQuery('name', 'Claude-API-Key');
-      credentialGR.query();
+      // Credential für API Key laden mit sn_auth.Credential API
+      var credential = new sn_auth.Credential();
+      var apiKey = credential.get('Claude-API-Key');
       
-      if (!credentialGR.next()) {
-        gs.info('Claude API Credential nicht gefunden in discovery_credentials');
-        // Fallback: Versuche sys_auth_profile_basic
-        var basicCredGR = new GlideRecord('sys_auth_profile_basic');
-        basicCredGR.addQuery('name', 'Claude-API-Key');
-        basicCredGR.query();
-        if (!basicCredGR.next()) {
-          gs.info('Claude API Credential auch nicht in sys_auth_profile_basic gefunden');
-          matchPercentage = calculateSimpleMatch(shortDescription, requestType);
-          return;
-        }
-        var apiKey = basicCredGR.getValue('password');
-      } else {
-        var apiKey = credentialGR.getValue('password');
+      if (!apiKey) {
+        gs.info('Claude API Credential "Claude-API-Key" nicht gefunden');
+        matchPercentage = calculateSimpleMatch(shortDescription, requestType);
+        return;
       }
       restMessage.setRequestHeader('x-api-key', apiKey);
       restMessage.setRequestHeader('anthropic-version', '2023-06-01');
