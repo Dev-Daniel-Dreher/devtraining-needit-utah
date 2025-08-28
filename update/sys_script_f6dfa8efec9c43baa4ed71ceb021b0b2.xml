@@ -49,15 +49,19 @@
       restMessage.setHttpMethod('POST');
       
       // Credential für API Key laden
-      var credential = new sn_cc.ConnectionInfoProvider().getCredentialByID('Claude-API-Key');
-      if (!credential) {
+      var credentialGR = new GlideRecord('sys_auth_profile_basic');
+      credentialGR.addQuery('name', 'Claude-API-Key');
+      credentialGR.query();
+      
+      if (!credentialGR.next()) {
         gs.info('Claude API Credential nicht gefunden');
         matchPercentage = calculateSimpleMatch(shortDescription, requestType);
         return;
       }
       
-      // Headers setzen
-      restMessage.setRequestHeader('x-api-key', credential.getAPIKey());
+      // Headers setzen - API Key aus Credential laden
+      var apiKey = credentialGR.getValue('password');
+      restMessage.setRequestHeader('x-api-key', apiKey);
       restMessage.setRequestHeader('anthropic-version', '2023-06-01');
       restMessage.setRequestHeader('content-type', 'application/json');
       
