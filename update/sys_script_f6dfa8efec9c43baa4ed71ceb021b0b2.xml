@@ -27,7 +27,8 @@
         <rest_service_text/>
         <rest_variables/>
         <role_conditions/>
-        <script><![CDATA[        (function executeRule(current, previous /*null when async*/) {
+        <script>
+        <![CDATA[        (function executeRule(current, previous /*null when async*/) {
 
   if (!current.short_description || !current.u_request_type) {
     return;
@@ -45,16 +46,16 @@
       restMessage.setEndpoint('https://api.anthropic.com/v1/messages');
       restMessage.setHttpMethod('POST');
 
-      // 🔑 Load API key using Credential Alias
-      // var cred = sn_auth.CredentialAlias.getCredential('x_58872_needit.Claude_Code_Alias');
-      
-      var cred = new sn_cc.StandardCredentialsProvider().getAuthCredentialByID("59d0744f83636210cc79f7c6feaad3e2");
-
+       // 🔑 Get API key securely via sn_cc.ConnectionInfoProvider
+      var connInfoProvider = new sn_cc.ConnectionInfoProvider();
+      var connInfo = connInfoProvider.getConnectionInfo('x_58872_needit.Claude_Code_Alias');
       var apiKey = null;
-      if (cred) {
-        apiKey = cred.getPassword();  // securely retrieves the stored API Key
-      } else {
-        gs.error('Claude API Credential Alias "x_58872_needit.Claude_Code_Alias" not found');
+      if (connInfo) {
+        apiKey = connInfo.getParameterValue("api_key"); // "api_key" is the default field name
+      }
+
+      if (!apiKey) {
+        gs.info('Claude API Key konnte nicht geladen werden (Alias: x_58872_needit.Claude_Code_Alias)');
         matchPercentage = calculateSimpleMatch(shortDescription, requestType);
         return;
       }
